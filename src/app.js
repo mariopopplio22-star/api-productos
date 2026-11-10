@@ -1,19 +1,20 @@
-//Nuestra aplicación puede tener muchos módulos
-//Productos > producto.controller > producto.routes
-//Clientes > cliente.controller > cliente.routes
-//Proveedores > proveedor.controller > proveedor.routes
+//app = apllication
+const express = require('express')  //Framework
+const routes = requiere('./routes') //Rutas
 
-//Todas las rutas se organizan gracias a index.js (Indice)
-const {Router} = require('express')
+const app = express() //Inicializamos la App
 
-//Esto se realiza por cada routes
-const productoRoutes = require('./producto.routes')
+app.use(express.json()) //Comunicación es JSON
 
-//Esto es solo uno para todas las rutas
-const router = Router()
+//Mensaje predeterminado 
+//https://miaplicacion.com/
+app.get('/', (req, res) => {
+ res.status(200).json({
+  ok: true,
+  message: 'API REST ejecutandose correctamente'
+ })
+})
 
-//Esto es por cada routes **
-router.use('/productos', productoRoutes)
-
-//Se exportan todas las rutas
-module.exports = router
+//Habilitamos las rutas de todos los modulos (index.js)
+app.use('/api', routes)
+module.exports = app
