@@ -1,11 +1,14 @@
-const {router} = require('express') //Manejador de rutas
-const controller = require('../controllers/producto.controller') //Controlador (lógica)
+// 1. Importar el Router de express
+const { Router } = require('express');
 
-const router = Router() //Considerar los verbos
+// 2. Importar tus rutas de módulos
+const productoRoutes = require('./producto.routes');
 
-router.get('/', controller.listarProductos)
-router.get('/:id', controller.obtenerProducto)
+// 3. Declarar el router UNA SOLA VEZ
+const router = Router();
 
-//Pendiente.... PUT, POST, DELETE
+// 4. Usar las rutas
+router.use('/productos', productoRoutes);
 
-module.exports = router
+// 5. Exportarlo
+module.exports = router;

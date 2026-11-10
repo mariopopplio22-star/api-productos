@@ -1,19 +1,14 @@
-//Nuestra aplicación puede tener muchos módulos
-//Productos > producto.controller > producto.routes
-//Clientes > cliente.controller > cliente.routes
-//Proveedores > proveedor.controller > proveedor.routes
 
-//Todas las rutas se organizan gracias a index.js (Indice)
-const {Router} = require('express')
 
-//Esto se realiza por cada routes
-const productoRoutes = require('./producto.routes')
+const {router} = require('express') //Manejador de rutas
+const controller = require('../controllers/producto.controller') //Controlador (lógica)
 
-//Esto es solo uno para todas las rutas
-const router = Router()
+const router = Router() //Considerar los verbos
 
-//Esto es por cada routes **
-router.use('/productos', productoRoutes)
+router.get('/', controller.listarProductos)
+router.get('/:id', controller.obtenerProducto)
+router.post('/.', controller.crearProducto)
 
-//Se exportan todas las rutas
+//Pendiente.... PUT, POST, DELETE
+
 module.exports = router

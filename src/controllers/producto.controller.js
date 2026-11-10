@@ -111,7 +111,14 @@ const crearProducto = async(req, res) => {
 
 const actualizarProducto = async(req, res) => {
   try{
+    const id = Number(req.params.id)
 
+    if (id < 0){
+      return res.status(400).json({
+        ok: false,
+        message: 'El id no puede ser negativo'
+      })
+    }
   }catch(e){
     console.error(e)
     res.status(500).json({
@@ -119,7 +126,37 @@ const actualizarProducto = async(req, res) => {
       message: 'Error interno en el servidor'
     })
   }
+
+  //Validar los campos (crearProducto)
+const errores = validarCampos(req.body) //req.body contiene todos los datos a registrar
+    if (errores.length > 0){
+      return res.status(400).json({
+        ok: false,
+        message: 'Verificar los datos solicitados',
+        errores
+      })
+    }
+
+    //¿Y si el ID no existe?
+    const [existe] = await pool.execute('SELECT id FROM productos WHERE id = ?', [id])
+    if (existe === 0){
+      return res.status(404).json({
+        ok: false,
+        message: 'El ID no existe'
+      })
+    }
+
+    //Finalmente actualizaremos....
+    const consulta = 'UPDATE productos SET marca=?, descripcion=?, precio=?, stock=? WHERE id=?'
+    const {marca, descripcion, precio, stock} = req.body
+    const [resultado] = await pool.execute(consulta, [marca, descripcion, precio, stock, id])
+
+    res.status(204).json({
+      ok: true,
+      filasAfectadas: resultado.affectedRows
+    })
 }
+
 
 const eliminarProducto = async(req, res) => {
   try{
