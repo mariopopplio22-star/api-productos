@@ -1,4 +1,4 @@
-const {router, Router} = require('express') //Manejador de rutas
+const {router} = require('express') //Manejador de rutas
 const controller = require('../controllers/producto.controller') //Controlador (lógica)
 
 const router = Router() //Considerar los verbos
