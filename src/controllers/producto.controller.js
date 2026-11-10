@@ -1,116 +1,104 @@
-//Este archivo contiene la logica de la aplicación
-// 5 procedimientos: buscar, listar, registrar, actualizar, eliminar
+const db = require('../config/database'); // Asegúrate de que esta sea la ruta correcta a tu conexión de BD
 
-//PASO 1
-//const Objeto = requiere ('') //TODOS LOS METODOS
-//const {otroObjeto} = requiere ('') //SOLO ALGUNAS FUNCIONES
-const {pool} = require ('/../config/database')
-const CAMPOS = 'id, marca, descripcion, precio, stock' //DATO COMUN
-
-//Todas las funciones seran asíncronas (tardaran un tiempo en ser resueltas...)
-//milisegundos, segundos (1000 =1sg)
-//Todas las funciones reciben y envian datos (pasarelas)
-//req (requiere - >>> solicitar), res (result - <<< resultado)
-const listarProductos = async(req, res) => {
-  //Se utiliza try - catch porque existe una probabilidad de error 
-  try{
-    const [productos] = await pool.query('SELECT * FROM productos ORDER BY id')
-    res.status(200).json({
-      ok:true,
-      total: productos.length,
-      data: productos
-    })
-  }catch(e){
-    console.error(e)
-    res.status(500).json({
-      ok: false,
-      message: 'Error interno en el servidor'
-    })
-  }
-}
-
-//Buscar ¿Cómo funciona?
-//API REST => https://miaplicacion.com/api/productos/1
-const obtenerProducto = async(req, res) => {
-  try{
-    //req.params representa los parámetros enviados por la URL
-    const id = Number(req.params.id)
-    if (id <= 0){
-      return res.status(400).json({
-        ok: false,
-        message: 'El ID no puede ser negativo o 0'
-      })
+// 1. Obtener todos los productos
+const obtenerProductos = async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT * FROM productos'); // Cambia 'productos' por el nombre de tu tabla
+        res.status(200).json({
+            ok: true,
+            total: rows.length,
+            data: rows
+        });
+    } catch (error) {
+        res.status(500).json({ ok: false, message: error.message });
     }
+};
 
-    //Si podemos buscar (>0). Utilizaremos EXECUTE porque pasaremos parametros
-    //Evitaremos SQLinjection (tecnica hackeo)
-    //? = comodín, representa un valor
-    const [registro] = await pool.execute(`SELECT * FROM productos WHRERE id = ?`, [id])
+// 2. Obtener un producto por ID
+const obtenerProductoPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await db.query('SELECT * FROM productos WHERE id = ?', [id]);
+        
+        if (rows.length === 0) {
+            return res.status(404).json({ ok: false, message: 'Producto no encontrado' });
+        }
 
-    //Existe la posibilidad que NO encontremos el registro 
-    if (registro.length === 0){
-      return res.status(404).json({
-        ok: false,
-        message: 'No existe el producto'
-      })
+        res.status(200).json({
+            ok: true,
+            data: rows[0]
+        });
+    } catch (error) {
+        res.status(500).json({ ok: false, message: error.message });
     }
+};
 
-    //Si llegamos hasta aqui entonces si existe el registro
-    res.status(200).json({
-      ok: true,
-      data: registro[0]
-    })
-  }catch(e){
-    console.error(e)
-    res.status(500).json({
-      ok: false,
-      message: 'Error interno en el servidor'
-    })
-  }
-}
+// 3. Crear un producto
+const crearProducto = async (req, res) => {
+    try {
+        const { nombre, precio, stock } = req.body; // Ajusta según las columnas de tu tabla
+        const [result] = await db.query(
+            'INSERT INTO productos (nombre, precio, stock) VALUES (?, ?, ?)', 
+            [nombre, precio, stock]
+        );
 
-const crearProducto = async(req, res) => {
-  try{
+        res.status(201).json({
+            ok: true,
+            message: 'Producto creado correctamente',
+            id: result.insertId
+        });
+    } catch (error) {
+        res.status(500).json({ ok: false, message: error.message });
+    }
+};
 
-  }catch(e){
-    console.error(e)
-    res.status(500).json({
-      ok: false,
-      message: 'Error interno en el servidor'
-    })
-  }
-}
+// 4. Actualizar un producto
+const actualizarProducto = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nombre, precio, stock } = req.body;
 
-const actualizarProducto = async(req, res) => {
-  try{
+        const [result] = await db.query(
+            'UPDATE productos SET nombre = ?, precio = ?, stock = ? WHERE id = ?',
+            [nombre, precio, stock, id]
+        );
 
-  }catch(e){
-    console.error(e)
-    res.status(500).json({
-      ok: false,
-      message: 'Error interno en el servidor'
-    })
-  }
-}
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ ok: false, message: 'Producto no encontrado para actualizar' });
+        }
 
-const eliminarProducto = async(req, res) => {
-  try{
+        res.status(200).json({
+            ok: true,
+            message: `Producto ${id} actualizado correctamente`
+        });
+    } catch (error) {
+        res.status(500).json({ ok: false, message: error.message });
+    }
+};
 
-  }catch(e){
-    console.error(e)
-    res.status(500).json({
-      ok: false,
-      message: 'Error interno en el servidor'
-    })
-  }
-}
+// 5. Eliminar un producto
+const eliminarProducto = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [result] = await db.query('DELETE FROM productos WHERE id = ?', [id]);
 
-//Todos los metodos deben ser EXPORTADOS (se utilizaran desde la app)
-//el que lo utilozara sera los 'routes'
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ ok: false, message: 'Producto no encontrado para eliminar' });
+        }
+
+        res.status(200).json({
+            ok: true,
+            message: `Producto ${id} eliminado correctamente`
+        });
+    } catch (error) {
+        res.status(500).json({ ok: false, message: error.message });
+    }
+};
+
 module.exports = {
-  listarProductos,
-  obtenerProducto,
-  crearProducto,
-  actualizarProducto,
-  eliminarProducto
-}
+    obtenerProductos,
+    obtenerProductoPorId,
+    crearProducto,
+    actualizarProducto,
+    eliminarProducto
+};

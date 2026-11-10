@@ -1,20 +1,19 @@
-//app = apllication
-const express = require('express')  //Framework
-const routes = requiere('./routes') //Rutas
+const express = require('express'); // Framework
+const routes = require('./routes/producto.routes'); // Rutas
 
-const app = express() //Inicializamos la App
+const app = express(); // Inicializamos la App
 
-app.use(express.json()) //Comunicación es JSON
+app.use(express.json()); // Comunicación es JSON
 
-//Mensaje predeterminado 
-//https://miaplicacion.com/
+// Mensaje predeterminado
 app.get('/', (req, res) => {
- res.status(200).json({
-  ok: true,
-  message: 'API REST ejecutandose correctamente'
- })
-})
+    res.status(200).json({
+        ok: true,
+        message: 'API REST ejecutandose correctamente'
+    });
+});
 
-//Habilitamos las rutas de todos los modulos (index.js)
-app.use('/api', routes)
-module.exports = app
+// Habilitamos las rutas de los modulos
+app.use('/api', routes);
+
+module.exports = app;
