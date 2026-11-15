@@ -1,18 +1,13 @@
 const { Router } = require('express');
-const { 
-    listarClientes, 
-    obtenerCliente, 
-    crearCliente, 
-    actualizarCliente, 
-    eliminarCliente 
-} = require('../controllers/cliente.controller');
+const clienteController = require('../controllers/cliente.controller');
 
 const router = Router();
 
-router.get('/', listarClientes);
-router.get('/:id', obtenerCliente);
-router.post('/', crearCliente);
-router.put('/:id', actualizarCliente);
-router.delete('/:id', eliminarCliente);
+router.get('/', clienteController.listar);
+router.get('/:id', clienteController.obtener);
+router.post('/', clienteController.crear);
+router.put('/:id', clienteController.actualizar);
+router.delete('/:id', clienteController.eliminar);
 
-module.exports = router; // 👈 Esto es vital para que el index.js lo pueda leer
+// ¡ESTA LÍNEA ES VITAL! Si falta, Express da 404
+module.exports = router;
