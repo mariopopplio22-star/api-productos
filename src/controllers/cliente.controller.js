@@ -1,85 +1,179 @@
-const pool = require('../config/database');
-// 1. Listar todos los clientes
-const listar = async (req, res) => {
-    try {
-        const [rows] = await pool.query('SELECT * FROM clientes');
-        res.json(rows);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al listar los clientes', error: error.message });
+const { pool } = require('../config/database');
+
+// Validación de campos basada exactamente en tu tabla MySQL
+const validarCampos = ({ apellidos, nombres, telefono, direccion, email } = {}) => {
+  const errores = []
+  if (!apellidos || apellidos.trim() === '') errores.push('Los apellidos son obligatorios')
+  if (!nombres || nombres.trim() === '') errores.push('Los nombres son obligatorios')
+  if (!telefono || telefono.trim() === '') errores.push('El teléfono es obligatorio')
+  if (!direccion || direccion.trim() === '') errores.push('La dirección es obligatoria')
+  if (!email || email.trim() === '') errores.push('El correo electrónico es obligatorio')
+    
+  return errores  
+}
+
+const listarClientes = async (req, res) => {
+  try {
+    const [clientes] = await pool.query('SELECT * FROM clientes ORDER BY id')
+    res.status(200).json({
+      ok: true,
+      total: clientes.length,
+      data: clientes
+    })
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({
+      ok: false,
+      message: 'Error interno en el servidor'
+    })
+  }
+}
+
+const obtenerCliente = async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El ID no puede ser negativo, cero o inválido'
+      })
     }
-};
 
-// 2. Obtener un cliente por su ID
-const obtener = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const [rows] = await pool.query('SELECT * FROM clientes WHERE id = ?', [id]);
-        
-        if (rows.length === 0) {
-            return res.status(404).json({ message: 'Cliente no encontrado' });
-        }
-        res.json(rows[0]);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener el cliente', error: error.message });
+    const [registro] = await pool.execute(`SELECT * FROM clientes WHERE id = ?`, [id])
+
+    if (registro.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'No existe el cliente'
+      })
     }
-};
 
-// 3. Crear un nuevo cliente
-const crear = async (req, res) => {
-    try {
-        const { apellidos, nombres, telefono, direccion, email } = req.body;
-        const [result] = await pool.query(
-            'INSERT INTO clientes (apellidos, nombres, telefono, direccion, email) VALUES (?, ?, ?, ?, ?)',
-            [apellidos, nombres, telefono, direccion, email]
-        );
-        res.status(201).json({ 
-            message: 'Cliente creado con éxito', 
-            id: result.insertId 
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al crear el cliente', error: error.message });
+    res.status(200).json({
+      ok: true,
+      data: registro[0]
+    })
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({
+      ok: false,
+      message: 'Error interno en el servidor'
+    })
+  }
+}
+
+const crearCliente = async (req, res) => {
+  try {
+    const errores = validarCampos(req.body)
+    if (errores.length > 0) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Verificar los datos solicitados',
+        errores
+      })
     }
-};
 
-// 4. Actualizar un cliente existente
-const actualizar = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { apellidos, nombres, telefono, direccion, email } = req.body;
-        
-        const [result] = await pool.query(
-            'UPDATE clientes SET apellidos = ?, nombres = ?, telefono = ?, direccion = ?, email = ? WHERE id = ?',
-            [apellidos, nombres, telefono, direccion, email, id]
-        );
+    const { apellidos, nombres, telefono, direccion, email } = req.body
+    const consulta = `INSERT INTO clientes (apellidos, nombres, telefono, direccion, email) VALUES (?, ?, ?, ?, ?)`
+    const [registro] = await pool.execute(consulta, [apellidos, nombres, telefono, direccion, email])
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Cliente no encontrado para actualizar' });
-        }
-        res.json({ message: 'Cliente actualizado con éxito' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al actualizar el cliente', error: error.message });
+    res.status(201).json({
+      ok: true,
+      id: registro.insertId
+    })
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({
+      ok: false,
+      message: 'Error interno en el servidor'
+    })
+  }
+}
+
+const actualizarCliente = async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({
+        ok: false,
+        message: 'El id no puede ser negativo, cero o inválido'
+      })
     }
-};
 
-// 5. Eliminar un cliente
-const eliminar = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const [result] = await pool.query('DELETE FROM clientes WHERE id = ?', [id]);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Cliente no encontrado para eliminar' });
-        }
-        res.json({ message: 'Cliente eliminado con éxito' });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al eliminar el cliente', error: error.message });
+    const errores = validarCampos(req.body)
+    if (errores.length > 0) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Verificar los datos solicitados',
+        errores
+      })
     }
-};
+
+    const [existe] = await pool.execute('SELECT id FROM clientes WHERE id = ?', [id])
+    if (existe.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'El ID no existe'
+      })
+    }
+
+    // Actualiza los campos y registra la fecha de modificación con NOW()
+    const consulta = 'UPDATE clientes SET apellidos=?, nombres=?, telefono=?, direccion=?, email=?, updated_at=NOW() WHERE id=?'
+    const { apellidos, nombres, telefono, direccion, email } = req.body
+    const [resultado] = await pool.execute(consulta, [apellidos, nombres, telefono, direccion, email, id])
+
+    res.status(200).json({
+      ok: true,
+      message: 'Cliente actualizado correctamente',
+      filasAfectadas: resultado.affectedRows
+    })
+
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({
+      ok: false,
+      message: 'Error interno en el servidor'
+    })
+  }
+}
+
+const eliminarCliente = async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({
+        ok: false,
+        message: 'ID inválido'
+      })
+    }
+
+    const [resultado] = await pool.execute('DELETE FROM clientes WHERE id = ?', [id])
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'El ID no existe'
+      })
+    }
+    
+    res.status(200).json({
+      ok: true,
+      message: 'Cliente eliminado correctamente'
+    })
+
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({
+      ok: false,
+      message: 'Error interno en el servidor'
+    })
+  }
+}
 
 module.exports = {
-    listar,
-    obtener,
-    crear,
-    actualizar,
-    eliminar
-};
+  listarClientes,
+  obtenerCliente,
+  crearCliente,
+  actualizarCliente,
+  eliminarCliente
+}

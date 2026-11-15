@@ -1,14 +1,18 @@
 const { Router } = require('express');
-// Importas el controlador completo como un objeto
-const clienteController = require('../controllers/cliente.controller');
+const { 
+    listarClientes, 
+    obtenerCliente, 
+    crearCliente, 
+    actualizarCliente, 
+    eliminarCliente 
+} = require('../controllers/cliente.controller');
 
 const router = Router();
 
-// Y llamas a cada función utilizando clienteController.[nombre_de_la_funcion]
-router.get('/', clienteController.listar);
-router.get('/:id', clienteController.obtener);
-router.post('/', clienteController.crear);
-router.put('/:id', clienteController.actualizar);
-router.delete('/:id', clienteController.eliminar);
+router.get('/', listarClientes);
+router.get('/:id', obtenerCliente);
+router.post('/', crearCliente);
+router.put('/:id', actualizarCliente);
+router.delete('/:id', eliminarCliente);
 
 module.exports = router;
