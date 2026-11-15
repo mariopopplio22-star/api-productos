@@ -20,5 +20,24 @@ VALUES
 ('LG', 'Lavadora', 1200, 3),
 ('Sony', 'Playstation 5', 3200, 2);
 
+SELECT * FROM productos;
 
+CREATE TABLE IF NOT EXISTS clientes
+(
+    id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    apellidos   VARCHAR(100) NOT NULL,
+    nombres     VARCHAR(100) NOT NULL,
+    telefono    VARCHAR(20)  NOT NULL,
+    direccion   VARCHAR(200) NOT NULL,
+    email       VARCHAR(150) NOT NULL,
+    create_at   DATETIME     NOT NULL DEFAULT NOW(),
+    updated_at  DATETIME     NULL
+) ENGINE = INNODB;
+
+INSERT INTO clientes (apellidos, nombres, telefono, direccion, email) VALUES
+('Taboada Mamani', 'Alexander Carlos', '987654321', 'Av. Javier Prado Este 1200, San Isidro', 'jquispe@gmail.com'),
+('Flores Achíc', 'María Elena', '912345678', 'Jr. de la Unión 450, Cercado de Lima', 'mflores@yahoo.com'),
+('García Uceda', 'Dylan Alberto', '998877665', 'Calle Los Pinos 304, Miraflores', 'lgarcia@outlook.com');
+
+SELECT * FROM clientes;
 

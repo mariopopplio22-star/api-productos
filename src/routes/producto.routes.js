@@ -10,7 +10,6 @@ const {
 const router = Router();
 
 router.get('/', listarProductos);
-
 router.get('/:id', obtenerProducto);
 router.post('/', crearProducto);
 router.put('/:id', actualizarProducto);
