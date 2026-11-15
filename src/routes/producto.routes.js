@@ -1,15 +1,19 @@
+const { Router } = require('express');
+const { 
+    listarProductos, 
+    obtenerProducto, 
+    crearProducto, 
+    actualizarProducto, 
+    eliminarProducto 
+} = require('../controllers/producto.controller'); // Asegúrate de que la ruta a tu controlador sea correcta
 
+const router = Router();
 
-const {router} = require('express') //Manejador de rutas
-const controller = require('../controllers/producto.controller') //Controlador (lógica)
+router.get('/', listarProductos);
 
-const router = Router() //Considerar los verbos
+router.get('/:id', obtenerProducto);
+router.post('/', crearProducto);
+router.put('/:id', actualizarProducto);
+router.delete('/:id', eliminarProducto);
 
-router.get('/', controller.listarProductos)
-router.get('/:id', controller.obtenerProducto)
-router.post('/.', controller.crearProducto)
-router.put('/:id', controller.actualizarProducto)
-
-//Pendiente.... PUT, POST, DELETE
-
-module.exports = router
+module.exports = router;

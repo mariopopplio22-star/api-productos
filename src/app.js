@@ -1,20 +1,20 @@
-//app = apllication
-const express = require('express')  //Framework
-const routes = require('./routes/') //Rutas
+const express = require('express'); 
+const routes = require('./routes'); // Importa el index.js de la carpeta routes
 
-const app = express() //Inicializamos la App
+const app = express(); 
 
-app.use(express.json()) //Comunicación es JSON
+// Middleware indispensable para que Express entienda JSON en las peticiones POST, PUT, etc.
+app.use(express.json()); 
 
-//Mensaje predeterminado 
-//https://miaplicacion.com/
+// Ruta raíz de bienvenida (esta es la que te responde cuando entras a http://localhost:3000/)
 app.get('/', (req, res) => {
- res.status(200).json({
-  ok: true,
-  message: 'API REST ejecutandose correctamente'
- })
-})
+    res.status(200).json({
+        ok: true,
+        message: 'API REST ejecutandose correctamente'
+    });
+});
 
-//Habilitamos las rutas de todos los modulos (index.js)
-app.use('/api', routes)
-module.exports = app
+// Prefijo global para todas tus rutas de la aplicación: /api
+app.use('/api', routes);
+
+module.exports = app;

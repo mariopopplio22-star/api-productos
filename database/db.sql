@@ -20,6 +20,5 @@ VALUES
 ('LG', 'Lavadora', 1200, 3),
 ('Sony', 'Playstation 5', 3200, 2);
 
-SELECT * FROM productos;
 
 

@@ -1,14 +1,9 @@
-// 1. Importar el Router de express
 const { Router } = require('express');
+const productoRoutes = require('./producto.routes'); // Asegúrate de que el nombre del archivo coincida exactamente
 
-// 2. Importar tus rutas de módulos
-const productoRoutes = require('./producto.routes');
-
-// 3. Declarar el router UNA SOLA VEZ
 const router = Router();
 
-// 4. Usar las rutas
+
 router.use('/productos', productoRoutes);
 
-// 5. Exportarlo
 module.exports = router;
