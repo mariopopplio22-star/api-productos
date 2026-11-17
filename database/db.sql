@@ -41,3 +41,21 @@ INSERT INTO clientes (apellidos, nombres, telefono, direccion, email) VALUES
 
 SELECT * FROM clientes;
 
+CREATE TABLE IF NOT EXISTS proveedores
+(
+    id          INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    razonsocial VARCHAR(200) NOT NULL,
+    contacto    VARCHAR(150) NOT NULL,
+    ruc         VARCHAR(11)  NOT NULL,
+    direccion   VARCHAR(200) NOT NULL,
+    create_at   DATETIME     NOT NULL DEFAULT NOW(),
+    updated_at  DATETIME     NULL
+) ENGINE = INNODB;
+
+INSERT INTO proveedores (razonsocial, contacto, ruc, direccion) VALUES
+('Distribuidora Andina S.A.C.', 'Luis Mendoza', '20123456789', 'Av. Argentina 1850, Cercado de Lima'),
+('Comercial del Pacífico E.I.R.L.', 'Rosa Salazar', '20456789123', 'Jr. Paruro 720, Cercado de Lima'),
+('Tecnología Peruana S.A.C.', 'Carlos Herrera', '20678912345', 'Av. Arequipa 2450, Lince');
+
+SELECT * FROM proveedores;
+
